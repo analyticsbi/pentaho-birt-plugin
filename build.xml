@@ -1,61 +1,64 @@
-<project name="Pentaho BIRT Plugin" basedir="." default="deploy">
-    <property file="build.properties" />
-    <echo message="deploy dest: ${deploy.dest} " />
-	<path id="master-classpath">
-	  <fileset dir="lib">
-	    <include name="*.jar"/>
-	  </fileset>
-	</path>
-
-	<target name="clean" >
-		<delete dir="build" />
-		<delete dir="generated_src" />
-		<delete dir="dist" />	
-	</target>
-	<target name="init" depends="clean">
-		<mkdir dir="build/classes" />
-		<mkdir dir="dist" />
-		<mkdir dir="generated_src" />
-	</target>
-	
-	
-	<target name="compile" depends="init">
-		<copy todir="generated_src" >
-		   <fileset dir="src" />
-		   <filterchain>
-				<replaceregex pattern="\$\{" replace="{" />
-			   <filterreader classname="org.apache.tools.ant.filters.ReplaceTokens">
-					<param type="propertiesfile" value="build.properties"/>
-					<param type="tokenchar" name="begintoken" value="{"/>
-					<param type="tokenchar" name="endtoken" value="}"/>
-				</filterreader>
-			</filterchain>
-		</copy>
-		<javac destdir="build/classes" includeantruntime="false">
-		  <src path="generated_src"/>
-		  <!--classpath refid="master-classpath"/-->
-          <classpath>
-              <fileset dir="${birt.reportengine.dir}/lib" />
-              <fileset dir="${deploy.dest}/tomcat/webapps/pentaho/WEB-INF/lib" />
-              <fileset dir="${deploy.dest}/tomcat/lib" />
-              <!--athelement location="${deploy.dest}/tomcat/webapps/pentaho/WEB-INF/lib/commons-logging-1.1.1.jar" /-->
-          </classpath>
-		</javac>
-	</target>
-		
-	<target name="compress" depends="compile" >
-		<jar destfile="dist/birt-plugin/lib/birt-plugin.jar" basedir="build/classes" />
-	</target>
-	
-	<target name="package" depends="compile,compress">
-		<copy todir="dist/birt-plugin" >
-			<fileset dir="package-res" />
-		</copy>
-	</target>
-	
-	<target name="deploy" depends="package" >
-		<copy todir="${deploy.dest}/pentaho-solutions/system" >
-			<fileset dir="dist" />
-		</copy>
-	</target>
-</project>	
+<project basedir="." default="deploy" name="Pentaho BIRT Plugin">
+    <property file="build.properties"/>
+    <echo message="deploy dest: ${deploy.dest} "/>
+    <path id="master-classpath">
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="generated_src"/>
+        <delete dir="dist"/>
+    </target>
+    <target depends="clean" name="init">
+        <mkdir dir="build/classes"/>
+        <mkdir dir="dist"/>
+        <mkdir dir="generated_src"/>
+    </target>
+    <target depends="init" name="compile">
+        <copy todir="generated_src">
+            <fileset dir="src"/>
+            <filterchain>
+                <replaceregex pattern="\$\{" replace="{"/>
+                <filterreader classname="org.apache.tools.ant.filters.ReplaceTokens">
+                    <param type="propertiesfile" value="build.properties"/>
+                    <param name="begintoken" type="tokenchar" value="{"/>
+                    <param name="endtoken" type="tokenchar" value="}"/>
+                </filterreader>
+            </filterchain>
+        </copy>
+        <javac destdir="build/classes" includeantruntime="false">
+            <src path="generated_src"/>
+            <!--classpath refid="master-classpath"/-->
+            <classpath>
+                <fileset dir="${birt.reportengine.dir}/lib"/>
+                <fileset dir="${deploy.dest}/tomcat/webapps/pentaho/WEB-INF/lib"/>
+                <fileset dir="${deploy.dest}/tomcat/lib"/>
+                <!--athelement location="${deploy.dest}/tomcat/webapps/pentaho/WEB-INF/lib/commons-logging-1.1.1.jar" /-->
+            </classpath>
+        </javac>
+    </target>
+    <target depends="compile" name="compress">
+        <jar basedir="build/classes" destfile="dist/birt-plugin/lib/birt-plugin.jar"/>
+    </target>
+    <target depends="compile,compress" name="package">
+        <copy todir="dist/birt-plugin">
+            <fileset dir="package-res"/>
+                <fileset dir="package-res"/>
+                <filterchain>
+                    <replaceregex pattern="\$\{" replace="{"/>
+                    <filterreader classname="org.apache.tools.ant.filters.ReplaceTokens">
+                        <param type="propertiesfile" value="build.properties"/>
+                        <param name="begintoken" type="tokenchar" value="{"/>
+                        <param name="endtoken" type="tokenchar" value="}"/>
+                    </filterreader>
+                </filterchain>            
+        </copy>
+    </target>
+    <target depends="package" name="deploy">
+        <copy todir="${deploy.dest}/pentaho-solutions/system">
+            <fileset dir="dist"/>
+        </copy>
+    </target>
+</project>
